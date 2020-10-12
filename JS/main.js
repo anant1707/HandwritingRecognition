@@ -28,7 +28,7 @@ var colorDiv = document.getElementById("color_val");
 //SETTING DEFAULTS
 var eraser_size=5//default
 var pen_colour="#000000";
-var pen_size=5;
+var pen_size=10;
 
 ctx.lineWidth=pen_size;//default
 ctx.lineCap="round";

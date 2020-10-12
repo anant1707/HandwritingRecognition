@@ -14,23 +14,6 @@
     border: none;
     border-radius: 100%;
 }
-html, body {
-	width: 100%;
-	height: 100%;
-}
-
-#sketching_area {
-	border: 10px solid gray;
-	height: 100%;
-	position: relative;
-}
-
-#tcanvas {
-	position: absolute;
-	left: 0px; right: 0;
-	bottom: 0; top: 0;
-	cursor: crosshair;
-}
 .above-ink-canvas {
       display: block;
     }
