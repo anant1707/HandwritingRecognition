@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <title>Sample WB app</title>
+        <link rel="stylesheet" href="CSS/style.css">
+      </head>
+    <body>
+      <div class="ink-toolbar" id="toolbar">
+        <div class="ink-toolbar-begin">
+
+
+          <div class="ink-button-container">
+            <button class="ink-button" onclick="selectPen();" id="pen-button">
+              <img src="EXTERNAL/ICONS/create-icon.svg">
+            </button>
+            <div id="sections_panel">
+              <label for="color_picker">Choose Color</label>
+              <input type="color" id="color_picker">
+              <br>
+              <label for="brush_size">Select Brush Size</label>
+              <input type="range" id="brush_size">
+            </div>
+          </div>
+          
+          <div class="ink-button-container">
+            <button class="ink-button" onclick="selectEraser();" id="eraser-button">
+              <img src="EXTERNAL/ICONS/eraser-icon.svg" height="24px" width="24px">
+            </button>
+            <div id="sections_panel_1">
+              <div>
+              <p> this should be the hidden content</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="ink-button-container">
+            <button class="ink-button" onclick="ClearAll();">
+              <img src="EXTERNAL/ICONS/clear_all-icon.svg">
+            </button>
+          </div>
+
+          </div>
+
+          <div class="ink-toolbar-end">
+
+            <div class="ink-button-container">
+              <button class="ink-button" onclick="undo();" id="undo-button">
+                <img src="EXTERNAL/ICONS/undo-icon.svg">
+              </button>
+            </div>
+
+            <div class="ink-button-container">
+              <button class="ink-button" onclick="redo();" id="redo-button">
+                <img src="EXTERNAL/ICONS/redo-icon.svg">
+              </button>
+            </div>
+
+            
+            <div class="ink-button-container">
+              <button class="ink-button">
+                <img src="EXTERNAL/ICONS/save-icon.svg">
+              </button>
+            </div>
+
+            </div>
+        
+          </div>
+          <div id="sketching_area">
+    <canvas id="mainboard" style="position: fixed;"></canvas>
+  </div>
+    </body>
+    <script src="JS/main.js"></script>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "handwritingrecognition",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "electron": "^10.1.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start":"electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anant1707/HandwritingRecognition.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anant1707/HandwritingRecognition/issues"
+  },
+  "homepage": "https://github.com/anant1707/HandwritingRecognition#readme"
+}
