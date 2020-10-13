@@ -18,34 +18,54 @@ var current_stroke=[];
 var colorButton = document.getElementById("color_picker");
 var colorDiv = document.getElementById("color_val");
 
+
+
+//temporary initialisatons
+var mcanvas= document.createElement("canvas");
+var mctx=mcanvas.getContext('2d');
+mcanvas.width=canvas.width;
+mcanvas.height=canvas.height;
+
 //SETTING DEFAULTS
 var eraser_size=5//default
 var pen_colour="#000000";
 var pen_size=10;
 
-ctx.lineWidth=pen_size;//default
-ctx.lineCap="round";
-ctx.strokeStyle=pen_colour;//default
-ctx.lineJoin='round';
+mctx.lineWidth=ctx.lineWidth=pen_size;//default
+ctx.lineCap=mctx.lineCap="round";
+ctx.strokeStyle=mctx.strokeStyle=pen_colour;//default
+ctx.lineJoin=mctx.lineJoin='round';
+
+
 
 
 function start_draw(e)
 {
    is_drawing=true;
-   current_stroke=[];
-   current_stroke.push(
-       {
-           x:e.clientX,
-           y:e.clientY+shiftY
-       }
-   );
+   //clear temporary canvas
+   //mctx.clearRect(0,0,mcanvas.width,mcanvas.height);
+
+   //push elements to current stroke
+   ctx.clearRect(0,0,canvas.width,canvas.height);
+   ctx.moveTo(e.offsetX,e.offsetY);
    ctx.beginPath();
+   current_stroke.push(
+      {
+          x:e.offsetX,
+          y:e.offsetY+shiftY
+      }
+  );
 }
 function stop_draw()
 {
    is_drawing=false;
+
+   mctx.drawImage(canvas,0,0);
    points.push(current_stroke);
+   current_stroke=[];
+   
 }
+
 function draw(e)
 {
    if(!is_drawing)
@@ -53,14 +73,45 @@ function draw(e)
 
    if(is_pen)
    {
-    current_stroke.push(
-        {
-            x:e.clientX,
-            y:e.clientY+shiftY
-        }
-    );
-   ctx.lineTo(e.clientX,e.clientY);
-   ctx.stroke();
+      current_stroke.push
+   (
+      {
+         x:e.offsetX,
+         y:e.offsetY,
+      }
+   );
+   ctx.clearRect(0, 0, canvas.width, canvas.height);
+   ctx.drawImage(mcanvas,0,0);
+      if (current_stroke.length < 3) {
+         var b = current_stroke[0];
+         ctx.beginPath();
+         ctx.arc(b.x, b.y, ctx.lineWidth / 2, 0, Math.PI * 2, !0);
+         ctx.fill();
+         ctx.closePath();
+         return;
+       }
+       
+       // Tmp canvas is always cleared up before drawing.
+       ctx.clearRect(0, 0, canvas.width, canvas.height);
+       ctx.drawImage(mcanvas,0,0);
+       ctx.beginPath();
+       ctx.moveTo(current_stroke[0].x, current_stroke[0].y);
+       
+       for (var i = 1; i < current_stroke.length - 2; i++) {
+         var c = (current_stroke[i].x + current_stroke[i + 1].x) / 2;
+         var d = (current_stroke[i].y + current_stroke[i + 1].y) / 2;
+         
+         ctx.quadraticCurveTo(current_stroke[i].x, current_stroke[i].y, c, d);
+       }
+       
+       // For the last 2 points
+       ctx.quadraticCurveTo(
+         current_stroke[i].x,
+         current_stroke[i].y,
+         current_stroke[i + 1].x,
+         current_stroke[i + 1].y
+       );
+       ctx.stroke();
    }
    else
    {
@@ -126,10 +177,10 @@ function ClearAll()
 
 function scroll(e)
 {
-    shiftY+=e.deltaY*0.5;
+    shiftY+=e.deltaY;
     if(shiftY<=0)
     shiftY=0;
-    redraw_all();
+    requestAnimationFrame(redraw_all);
 }
 
 function selectPen()

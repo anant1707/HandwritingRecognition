@@ -1,44 +1,40 @@
 //INITIALISATIONS
 const canvas=document.getElementById("mainboard");
 const ctx=canvas.getContext("2d");
-const undo_button=document.getElementById("undo-button");
-const redo_button=document.getElementById("redo-button");
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-document.getElementById("pen-button").style="background: #e5e5e5;outline: none;-webkit-box-shadow: inset 0px 0px 5px #c1c1c1;-moz-box-shadow: inset 0px 0px 5px #c1c1c1;box-shadow: inset 0px 0px 5px #c1c1c1;"
-
 var tcanvas = document.createElement('canvas');
 var tctx = tcanvas.getContext('2d');
+const undo_button=document.getElementById("undo-button");
+const redo_button=document.getElementById("redo-button");
+canvas.width=tcanvas.width=window.innerWidth;
+canvas.height=tcanvas.height=window.innerHeight;
+document.getElementById("pen-button").style="background: #e5e5e5;outline: none;-webkit-box-shadow: inset 0px 0px 5px #c1c1c1;-moz-box-shadow: inset 0px 0px 5px #c1c1c1;box-shadow: inset 0px 0px 5px #c1c1c1;"
+
+
 tcanvas.id = 'tcanvas';
-tcanvas.width = canvas.width;
-tcanvas.height = canvas.height;
+tcanvas.style="position:fixed";
 
 sketching_area.appendChild(tcanvas);
 
 var is_drawing=false;
 var is_pen=true;
 
+// Containers for storing coordinates
 var points=[];
 var redo_stack=[];
 var current_stroke=[];
 
+//color chooser
 var colorButton = document.getElementById("color_picker");
 var colorDiv = document.getElementById("color_val");
 
-//SETTING DEFAULTS
+//Setting Default
 var eraser_size=5//default
 var pen_colour="#000000";
 var pen_size=10;
-
-ctx.lineWidth=pen_size;//default
-ctx.lineCap="round";
-ctx.strokeStyle=pen_colour;//default
-ctx.lineJoin='round';
-
-tctx.lineWidth=pen_size;//default
-tctx.lineCap="round";
-tctx.strokeStyle=pen_colour;//default
-tctx.lineJoin='round';
+tctx.lineWidth=ctx.lineWidth=pen_size;//default
+tctx.lineCap=ctx.lineCap="round";
+tctx.strokeStyle=ctx.strokeStyle=pen_colour;//default
+tctx.lineJoin=ctx.lineJoin='round';
 
 
 function mouse_start_draw(e)
@@ -78,8 +74,8 @@ function mouse_stop_draw(e)
       }
    );
    ctx.drawImage(tcanvas, 0, 0);
-    tctx.clearRect(0, 0, tcanvas.width, tcanvas.height);
-   tcanvas.removeEventListener('mousemove', mouse_draw);
+   tctx.clearRect(0, 0, tcanvas.width, tcanvas.height);
+   //tcanvas.removeEventListener('mousemove', mouse_draw);
    points.push(current_stroke);
    current_stroke=[];
 }
@@ -163,7 +159,7 @@ function redo()
 function redraw_all()
 {
    ctx.clearRect(0,0,canvas.width,canvas.height);
-
+   
    for(var j=0; j<points.length ; j++)
       {
          var Stroke=points[j];
@@ -252,9 +248,9 @@ function selectEraser()
 }
 
 
-canvas.addEventListener("mousedown",mouse_start_draw);
-canvas.addEventListener("mouseup",mouse_stop_draw);
-canvas.addEventListener("mousemove",mouse_draw);
+tcanvas.addEventListener("mousedown",mouse_start_draw);
+tcanvas.addEventListener("mouseup",mouse_stop_draw);
+tcanvas.addEventListener("mousemove",mouse_draw);
 undo_button.addEventListener("mouseenter",function()
 {
    if(points.length==0)
