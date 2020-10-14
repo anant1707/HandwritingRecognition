@@ -8,8 +8,8 @@ app.on("ready",function()
 {
     mainWindow=new BrowserWindow(
         {
-            width:720,
-            height:1080
+            width:1080,
+            height:720
         });
     mainWindow.loadFile("src/index.html");
 });
