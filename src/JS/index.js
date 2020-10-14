@@ -1,4 +1,8 @@
 //INITIALISATIONS
+const { powerSaveBlocker } = require('electron');
+var electron = require('electron');
+const ipc=electron.ipcRenderer;
+
 const canvas=document.getElementById("mainboard");
 const ctx=canvas.getContext("2d");
 var tcanvas = document.createElement('canvas');
@@ -12,7 +16,6 @@ document.getElementById("pen-button").style="background: #e5e5e5;outline: none;-
 
 tcanvas.id = 'tcanvas';
 tcanvas.style="position:fixed";
-
 sketching_area.appendChild(tcanvas);
 
 var is_drawing=false;
@@ -247,6 +250,10 @@ function selectEraser()
    }
 }
 
+function save()
+{
+   ipc.send('save-this-file',points);
+}
 
 tcanvas.addEventListener("mousedown",mouse_start_draw);
 tcanvas.addEventListener("mouseup",mouse_stop_draw);
