@@ -12,9 +12,10 @@ app.on("ready",function()
         {
             width:1080,
             height:720,
-            webPreferences: {
-                nodeIntegration: true
-              }
+            webPreferences: 
+            {
+            nodeIntegration: true
+            }
         });
     mainWindow.loadFile("src/index.html");
 });

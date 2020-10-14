@@ -42,6 +42,7 @@ tctx.lineJoin=ctx.lineJoin='round';
 
 function mouse_start_draw(e)
 {
+   collapse_menus();
    is_drawing=true;
    tctx.beginPath();
    current_stroke=[];
@@ -142,6 +143,7 @@ function mouse_draw(e)
 
 function undo()
 {
+   collapse_menus();
    if(points.length<1)
    return;
 
@@ -152,6 +154,7 @@ function undo()
 
 function redo()
 {
+   collapse_menus();
    if(redo_stack.length<1)
    return;
    var last_stroke=redo_stack.pop();
@@ -201,6 +204,7 @@ function redraw_all()
 
 function ClearAll()
 {
+   collapse_menus();
    console.log(points);
    ctx.clearRect(0,0,canvas.width,canvas.height);
    points=[];
@@ -235,7 +239,6 @@ function selectEraser()
    is_pen=false;
    document.getElementById("eraser-button").style="background: #e5e5e5;outline: none;-webkit-box-shadow: inset 0px 0px 5px #c1c1c1;-moz-box-shadow: inset 0px 0px 5px #c1c1c1;box-shadow: inset 0px 0px 5px #c1c1c1;";
    document.getElementById("pen-button").style="";
-
    }
    else
    {
@@ -252,6 +255,7 @@ function selectEraser()
 
 function save()
 {
+   collapse_menus();
    ipc.send('save-this-file',points);
 }
 
@@ -273,8 +277,7 @@ redo_button.addEventListener("mouseenter",function()
       redo_button.style.cursor="hand";
 
 })
-document.getElementById("toolbar").addEventListener("mousedown",collapse_menus);
 colorButton.onchange = function() {
    console.log(colorButton.value);
-   ctx.strokeStyle=colorButton.value;
+   tctx.strokeStyle=colorButton.value;
 }
