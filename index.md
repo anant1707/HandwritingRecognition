@@ -1,2 +1,2 @@
 index.html
-src
+src/
