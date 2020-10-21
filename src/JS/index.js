@@ -1,7 +1,7 @@
 //INITIALISATIONS
-//const { powerSaveBlocker } = require('electron');
-//var electron = require('electron');
-//const ipc=electron.ipcRenderer;
+const { powerSaveBlocker } = require('electron');
+var electron = require('electron');
+const ipc=electron.ipcRenderer;
 
 const canvas=document.getElementById("mainboard");
 const ctx=canvas.getContext("2d");
@@ -256,7 +256,7 @@ function selectEraser()
 function save()
 {
    collapse_menus();
-   //ipc.send('save-this-file',points);
+   ipc.send('save-this-file',points);
 }
 
 tcanvas.addEventListener("mousedown",mouse_start_draw);
