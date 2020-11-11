@@ -9,8 +9,8 @@ var tcanvas = document.createElement('canvas');
 var tctx = tcanvas.getContext('2d');
 const undo_button=document.getElementById("undo-button");
 const redo_button=document.getElementById("redo-button");
-canvas.width=tcanvas.width=window.innerWidth;
-canvas.height=tcanvas.height=window.innerHeight;
+canvas.width=tcanvas.width=
+canvas.height=tcanvas.height=
 document.getElementById("pen-button").style="background: #e5e5e5;outline: none;-webkit-box-shadow: inset 0px 0px 5px #c1c1c1;-moz-box-shadow: inset 0px 0px 5px #c1c1c1;box-shadow: inset 0px 0px 5px #c1c1c1;"
 
 
@@ -33,7 +33,7 @@ var colorDiv = document.getElementById("color_val");
 //Setting Default
 var eraser_size=5//default
 var pen_colour="#000000";
-var pen_size=10;
+var pen_size=3;
 tctx.lineWidth=ctx.lineWidth=pen_size;//default
 tctx.lineCap=ctx.lineCap="round";
 tctx.strokeStyle=ctx.strokeStyle=pen_colour;//default
@@ -150,6 +150,7 @@ function undo()
    var last_stroke=points.pop();
    redo_stack.push(last_stroke);
    redraw_all();
+   
 }
 
 function redo()
