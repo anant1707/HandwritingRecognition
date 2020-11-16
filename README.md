@@ -5,9 +5,7 @@ but the more required or accepted format is digital.
 To bridge this gap we propose to build an application which will convert
 handwriting into formal text in real time and allow sharing or transferring
 that text to other applications.
-Under the guidance of our team mentor, Dr.Sandeep Harit,we are
-planning to develop a desktop application which will provide a virtual
-touchscreen utility.
+
 # PROPOSED SOLUTION /FEATURES :<br>
 ● We propose to make a desktop application which will have the
 features of a canvas and provide a drawing area where we will be
