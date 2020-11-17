@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 """
 Created on Mon Nov 16 15:35:58 2020
 
@@ -18,6 +18,25 @@ def scale_down(x,fc):
     for i in range(len(x)):
         if(i%skip!=0):
             templst.append(x[i])
+    return templst
+def scale_up(x):
+	templist=[]
+	for i in range(len(x)-1):
+		templist.append(x[i])
+		templist.append(tuple((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
+	templist.append(x[len(x)-1])
+	return templist
+def scale_up_prime(x):
+	skip=math.ceil(len(x)/(120-len(x)))
+	crnt=skip
+	templst=[]
+    for i in range(len(x)-1):
+        templst.append(x[i])
+        if(i==crnt):
+        	templist.append(tuple((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
+        	crnt+=skip
+
+    templist.append(x[len(x)-1]) 
     return templst
 
 nl=0
@@ -45,6 +64,12 @@ for temp in file:
                 
             if(len(x)>120):
                 x=scale_down(x,False)
+            if(len(x))>60:
+            	x=scale_up_prime(x)
+            if(len(x)<=60):
+            	x=scale_up(x)
+            if(len(x)<60):
+            	x=scale_up(x)
             x=[x,char]
             #print(x)
             if char in exc:
@@ -67,11 +92,3 @@ for row in arr:
 size=sorted(list(set(size)),reverse=True)
 
 np.save()
-    
-    
-    
-    
-    
-    
-    
-    
