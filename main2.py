@@ -10,7 +10,7 @@ import keras
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-model=keras.models.load_model("DL-part/Model/model_UJI2.h5")
+model=keras.models.load_model("DL-part/Model/model_UJI2_newest.h5")
 
 app = Flask(__name__)
 
@@ -18,7 +18,16 @@ app = Flask(__name__)
 #MYSQL CONFIGURATION
 app.config['SECRET_KEY'] = 'AjJ0lXaX5K9tai8QsUhwwQ'
 
-
+def scale_down(x,fc):
+    if(fc==True):
+        skip=math.ceil(len(x)/(len(x)-120))
+    else:
+        skip=len(x)//(len(x)-120)
+    templst=[]
+    for i in range(len(x)):
+        if(i%skip!=0):
+            templst.append(x[i])
+    return templst
 #HOMEPAGE
 
 @app.route('/',methods=['GET','POST'])
@@ -33,7 +42,15 @@ def home():
         
         #print(lst)
 
+        if(len(lst)>240):
+            lst=scale_down(lst,True)
+                
+        if(len(lst)>120):
+            lst=scale_down(lst,False)
+        
+
         StrokeSet=np.array(lst)
+        
         #print(StrokeSet)
         minx = min(StrokeSet[:, 0])
         miny = min(StrokeSet[:, 1])
@@ -49,25 +66,24 @@ def home():
         StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
 
 
-        if(len(StrokeSet)<392):
-            StrokeSet=np.vstack((StrokeSet,(np.zeros((392-len(StrokeSet),2)))))
+        if(len(StrokeSet)<120):
+            StrokeSet=np.vstack((StrokeSet,(np.zeros((120-len(StrokeSet),2)))))
 
         #print(StrokeSet.shape)
-        StrokeSet=np.reshape(StrokeSet,(1,392,2))
+        StrokeSet=np.reshape(StrokeSet,(1,120,2))
 
 
         char_map=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
        'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-       '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', ';',
-       ':', '?', '!', "'", '"', '(', ')', '%', '-', '@', '$', '<', '>']
+       '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
         #print(StrokeSet)
         y=model.predict(StrokeSet)
 
         y=np.array(y)
-        y=np.reshape(y,(78,))
+        y=np.reshape(y,(62,))
 
         #print(y[np.argmax(y)]*100)
         return (str(char_map[np.argmax(y)])+str(y[np.argmax(y)]*100)), 200

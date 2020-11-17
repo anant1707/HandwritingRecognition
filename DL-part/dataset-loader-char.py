@@ -21,22 +21,22 @@ def load_dataset():
     X=[]
     Y=[]
     maxi=-1
-    for dir in os.listdir("Char74k/Strokes"):
+    for dir in os.listdir("Data/Char74k/Strokes"):
         if(dir.endswith('-new')):
-            for files in os.listdir(f"Char74k/Strokes/{dir}"):
-               arr= np.load(f"Char74k/Strokes/{dir}/{files}",allow_pickle=True)
+            for files in os.listdir(f"Data/Char74k/Strokes/{dir}"):
+               arr= np.load(f"Data/Char74k/Strokes/{dir}/{files}",allow_pickle=True)
                x=arr[0]
                y=arr[1]
                X.append(x)
                maxi=max(maxi,len(x))
                Y.append(y)
-    X=pad_dataset(X,maxi)
+    #X=pad_dataset(X,maxi)
     return np.array(X),np.array(Y),maxi
 
 
 X_,Y_,ma=(load_dataset())
-np.save("X.npy",X_)
-np.save("Y.npy",Y_)
+np.save("Data/Char74k/X-raw.npy",X_)
+np.save("Data/Char74k/Y-raw.npy",Y_)
 
 
 print(X_.shape,Y_.shape)

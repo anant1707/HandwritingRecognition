@@ -40,12 +40,7 @@ def parse(path,code):
     maxx = max(StrokeSet[:, 0])
     maxy = max(StrokeSet[:, 1])
     
-       
-    StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-    StrokeSet[:, 1] = StrokeSet[:, 1] - miny
-    
-    StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-    StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
+      
     
     
     StrokeSet=[StrokeSet,code]

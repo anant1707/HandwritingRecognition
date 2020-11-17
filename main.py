@@ -6,11 +6,11 @@ Created on Thu Nov 12 20:35:51 2020
 """
 import os
 from flask import Flask, render_template, request, jsonify
-import keras
+#import keras
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-model=keras.models.load_model("DL-part/Model/model_char74k.h5")
+#model=keras.models.load_model("DL-part/Model/model_char74k.h5")
 app = Flask(__name__)
 
 #=============================================================================
@@ -104,12 +104,12 @@ def plot():
                 dictionary[c[0]]=c[1]
 
         for i in sorted(dictionary.keys()):
-            x.append(i-minx)
-            y.append(dictionary[i]-miny)
+            x.append((i-minx)/(maxx-minx))
+            y.append((dictionary[i]-miny)/(maxy-miny))
         #print(x,y)
 
-        plt.plot(x,y,'-ro')
-        plt.axis([-10,maxx-minx+10,maxy-miny+10,-10])
+        plt.scatter(x,y)
+        plt.axis([0,1,1,0])
         plt.savefig('plot.png')
         plt.close()
 
