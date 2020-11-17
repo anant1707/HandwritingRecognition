@@ -105,7 +105,7 @@ def plot():
 
         for i in sorted(dictionary.keys()):
             x.append((i-minx)/(maxx-minx))
-            y.append((dictionary[i]-miny)/(maxy-miny))
+            y.append(0.5)
         #print(x,y)
 
         plt.scatter(x,y)
