@@ -11,23 +11,14 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 model=keras.models.load_model("DL-part/Model/model_UJI2_newest.h5")
-
+from scalefn import scale_up,scale_down,scale_up_prime
 app = Flask(__name__)
 
 #=============================================================================
 #MYSQL CONFIGURATION
 app.config['SECRET_KEY'] = 'AjJ0lXaX5K9tai8QsUhwwQ'
 
-def scale_down(x,fc):
-    if(fc==True):
-        skip=math.ceil(len(x)/(len(x)-120))
-    else:
-        skip=len(x)//(len(x)-120)
-    templst=[]
-    for i in range(len(x)):
-        if(i%skip!=0):
-            templst.append(x[i])
-    return templst
+
 #HOMEPAGE
 
 @app.route('/',methods=['GET','POST'])
@@ -41,14 +32,19 @@ def home():
                 lst.append((float(c['x']),float(c['y'])))
         
         #print(lst)
-
-        if(len(lst)>240):
-            lst=scale_down(lst,True)
-                
-        if(len(lst)>120):
-            lst=scale_down(lst,False)
+        x=lst
+        if(len(x)>240):
+            x=scale_down(x,True)
+        if(len(x)>120):
+            x=scale_down(x,False)
+        if(len(x)>60 and len(x)<120):
+            x=scale_up_prime(x)
+        if(len(x)<=60):
+            x=scale_up(x)
+        if(len(x)<60):
+            x=scale_up(x)
         
-
+        lst=x
         StrokeSet=np.array(lst)
         
         #print(StrokeSet)
@@ -114,20 +110,15 @@ def plot():
         # print(points)
         x=[]
         y=[]
-        dictionary={}
-        for c in points:
-            if(c[0] in dictionary):
-                dictionary[c[0]]=min(dictionary[c[0]],c[1])
-            else:
-                dictionary[c[0]]=c[1]
+        
 
-        for i in sorted(dictionary.keys()):
-            x.append(i-minx)
-            y.append(dictionary[i]-miny)
+        for i in points:
+            x.append((i[0]-minx)/(maxx-minx))
+            y.append((i[1]-miny)/(maxy-miny))
         #print(x,y)
 
-        plt.plot(x,y,'-ro')
-        plt.axis([-10,maxx-minx+10,maxy-miny+10,-10])
+        plt.scatter(x,y)
+        plt.axis([0,1,1,0])
         plt.savefig('plot.png')
         plt.close()
 

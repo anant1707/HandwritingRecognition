@@ -6,6 +6,7 @@ Created on Mon Nov 16 15:35:58 2020
 """
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 file=open(r"Data/UJI/ujipenchars2.txt",mode='r',encoding='utf-8')
 
@@ -23,20 +24,20 @@ def scale_up(x):
 	templist=[]
 	for i in range(len(x)-1):
 		templist.append(x[i])
-		templist.append(tuple((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
+		templist.append(((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
 	templist.append(x[len(x)-1])
 	return templist
 def scale_up_prime(x):
-	skip=math.ceil(len(x)/(120-len(x)))
-	crnt=skip
-	templst=[]
+    skip=math.ceil(len(x)/(120-len(x)))
+    crnt=skip
+    templst=[]
     for i in range(len(x)-1):
         templst.append(x[i])
         if(i==crnt):
-        	templist.append(tuple((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
+        	templst.append(((x[i][0]+x[i+1][0])/2,(x[i][1]+x[i+1][1])/2))
         	crnt+=skip
 
-    templist.append(x[len(x)-1]) 
+    templst.append(x[len(x)-1]) 
     return templst
 
 nl=0
@@ -64,7 +65,7 @@ for temp in file:
                 
             if(len(x)>120):
                 x=scale_down(x,False)
-            if(len(x))>60:
+            if(len(x)>60 and len(x)<120):
             	x=scale_up_prime(x)
             if(len(x)<=60):
             	x=scale_up(x)
@@ -90,5 +91,3 @@ for row in arr:
     size.append(len(row[0]))
     
 size=sorted(list(set(size)),reverse=True)
-
-np.save()
