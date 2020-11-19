@@ -10,8 +10,9 @@ import keras
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-model=keras.models.load_model("DL-part/Model/model_UJI2_new.h5")
-from scalefn import scale_up,scale_down,scale_up_prime
+model=keras.models.load_model("DL-part/Model/model_UJI2_bezier_140.h5")
+from scalefn import evaluate_bezier
+from math import ceil,floor,factorial
 app = Flask(__name__)
 
 #=============================================================================
@@ -24,105 +25,123 @@ app.config['SECRET_KEY'] = 'AjJ0lXaX5K9tai8QsUhwwQ'
 @app.route('/',methods=['GET','POST'])
 def home():
     if(request.method=='POST'):
-        res=request.get_json(force=True)
+        resi=request.get_json(force=True)
         #print(res)
-        char_stroke=[]
+        char_strokes=[]
         prevmaxx=-1
         prevminx=1300
         prev_stroke_set=[]
         first=False
-        stcount=0
-        pos=[]
-        curr=[]
+       
+      
         
-        for stroke in res:
+        for stroke in resi:
             lst=[]
-            stcount+=1
+            
             for c in stroke:
-                  lst.append((float(c['x']),float(c['y'])))
+                  lst.append([float(c['x']),float(c['y'])])
                 
             StrokeSet=np.array(lst)
+        
         
             minx = min(StrokeSet[:, 0])
            
             maxx = max(StrokeSet[:, 0])
             
-            StrokeSet=list(StrokeSet)
+          
             if((minx<prevmaxx and minx>prevminx  ) or(maxx>prevminx and maxx<prevmaxx)or(minx<prevminx and maxx>prevmaxx) or (minx>prevminx and maxx<prevmaxx)or (minx<prevminx and maxx>prevmaxx)):
                 
-                prev_stroke_set.extend(StrokeSet)
+                prev_stroke_set.append(StrokeSet)
                 prevmaxx=max(maxx,prevmaxx)
-                curr.append(stcount)
+               
                 
                 prevminx=min(minx,prevminx)
             else:
                 first=True
-                char_stroke.append(np.array(prev_stroke_set))
-                pos.append(curr)
-                curr=[]
-                curr.append(stcount)
-                prev_stroke_set=StrokeSet
+                char_strokes.append(prev_stroke_set)
+              
+                prev_stroke_set=[]
+                prev_stroke_set.append(StrokeSet)
                 prevmaxx=maxx
                 prevminx=minx
                 
                 
-        char_stroke.append(np.array(prev_stroke_set))
+        char_strokes.append(prev_stroke_set)
         word=""
         
-        for x in char_stroke:
-            print(type(x))
-            if(len(x)>240):
-                x=scale_down(x,True)
-            if(len(x)>120):
-                x=scale_down(x,False)
-            if(len(x)>60 and len(x)<120):
-                x=scale_up_prime(x)
-            if(len(x)<=60):
-                x=scale_up(x)
-            if(len(x)<60):
-                x=scale_up(x)
+        for res in char_strokes:
+            SS=[]
+           
+            for stroke in res:
+            	lst=stroke
+            	
+            	SS.append(np.array(lst))
+    
+            sum=0
+            sumi=0
+            length=[]
+            for i in SS:
+            	length.append(len(i))
+            	sum+=len(i)
+    
+            for i in range(len(length)):
+            	length[i]=int((length[i]/sum)*80)
+            	sumi+=length[i]
+            sumi=sumi-length[-1]
+    
+            length[-1]=140-sumi
+            print(length)
+            for i in range(len(length)):
+            	SS[i]= evaluate_bezier(SS[i],length[i])
+    
+            lst=SS[0]
+            for i in range(len(length)-1):
+             	lst=np.vstack((lst,SS[i+1]))
             
-            lst=x
-            StrokeSet=np.array(lst)
+            StrokeSet=lst
+    
+            x,y=StrokeSet[:,0],StrokeSet[:,1]
+    
             
-            #print(StrokeSet)
             minx = min(StrokeSet[:, 0])
             miny = min(StrokeSet[:, 1])
             maxx = max(StrokeSet[:, 0])
             maxy = max(StrokeSet[:, 1])
-    
-            #print(minx,miny,maxx,maxy)
-    
             StrokeSet[:, 0] = StrokeSet[:, 0] - minx
             StrokeSet[:, 1] = StrokeSet[:, 1] - miny
-    
+
             StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
             StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
-    
-    
-            if(len(StrokeSet)<120):
-                StrokeSet=np.vstack((StrokeSet,(np.zeros((120-len(StrokeSet),2)))))
-    
-            #print(StrokeSet.shape)
-            StrokeSet=np.reshape(StrokeSet,(1,120,2))
-    
-    
+
+
+       
+            print(StrokeSet.shape)
+            StrokeSet=np.reshape(StrokeSet,(1,140,2))
+
+
+
             char_map=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-           '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-    
-            #print(StrokeSet)
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','0','1','2','3','4','5','6','7','8','9']
+
+        # x,y=StrokeSet[:,0],StrokeSet[:,1]
+        # print("plotting started")
+        # plt.plot(x, y, 'r.')
+        # #plt.axis([0,1,1,0])
+        # plt.savefig('plot.png')
+        # plt.close()
+        # print("plotting done")
+        # # #print(StrokeSet)
             y=model.predict(StrokeSet)
-    
+            y=model.predict(StrokeSet)
+
             y=np.array(y)
             y=np.reshape(y,(62,))
-            word+=(str(char_map[np.argmax(y)]))
-            
-
-        #print(y[np.argmax(y)]*100)
-        return (word+f"")
+            print(y[np.argmax(y)]*100)
+            word+=str(char_map[np.argmax(y)])	
+          
+        return (word)
         
         
     return render_template('index.html',title='Home',character='default')
