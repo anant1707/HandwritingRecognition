@@ -6,17 +6,17 @@ Created on Wed Nov 11 21:16:26 2020
 """
 import numpy as np
 import os
+char_map_74k=[str(i) for i in range(10)]
 
+AtoZ=list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+atoz=list("abcdefghijklmnopqrstuvwxyz")
+char_map_74k.extend(AtoZ)
+char_map_74k.extend(atoz)
 
-def padd(x,maxlen):
-    if(len(x)<maxlen):
-        x=np.vstack((x,(np.zeros((maxlen-len(x),2)))))
-    return x
-def pad_dataset(X,maxlen):
-    for i in range(len(X)):
-        X[i]=padd(X[i],maxlen)
-    return X
-    
+char_map=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+           'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','0','1','2','3','4','5','6','7','8','9']
 def load_dataset():
     X=[]
     Y=[]
@@ -28,16 +28,16 @@ def load_dataset():
                x=arr[0]
                y=arr[1]
                X.append(x)
-               maxi=max(maxi,len(x))
                Y.append(y)
     #X=pad_dataset(X,maxi)
     return np.array(X),np.array(Y),maxi
 
 
 X_,Y_,ma=(load_dataset())
-np.save("Data/Char74k/X-raw.npy",X_)
-np.save("Data/Char74k/Y-raw.npy",Y_)
+np.save("Data/Char74k/X.npy",X_)
+np.save("Data/Char74k/Y.npy",Y_)
 
 
 print(X_.shape,Y_.shape)
+
 

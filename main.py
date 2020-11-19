@@ -6,7 +6,7 @@ Created on Thu Nov 12 20:35:51 2020
 """
 
 
-#import keras
+import keras
 import matplotlib.pyplot as plt
 from builtins import str
 from flask import Flask,render_template,request,redirect,url_for,flash,session
@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from math import factorial
 import math
 
-#model=keras.models.load_model("DL-part/Model/model_char74k.h5")
+model=keras.models.load_model("DL-part/Model/model_merged_140.h5")
 app = Flask(__name__)
 #=============================================================================
 #MYSQL CONFIGURATION
@@ -37,7 +37,7 @@ app.config['MYSQL_PASSWORD'] = 'Anant@1707'
 app.config['MYSQL_DB'] = 'hwr'
 mysql=MySQL(app)
 #HOMEPAGE
-
+ii=np.array([i for i in range(62)])
 def dataret(email):
     cursor=mysql.connection.cursor()
     cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='userinfo'")
@@ -83,21 +83,20 @@ def home():
         	sum+=len(i)
 
         for i in range(len(length)):
-        	length[i]=int((length[i]/sum)*80)
+        	length[i]=int((length[i]/sum)*140)
         	sumi+=length[i]
 
-        length[-1]+=(80-sumi)
+        length[-1]+=(140-sumi)
 
         for i in range(len(length)):
-        	SS[i]= evaluate_bezier(SS[i],int(math.floor(80*length[i])))
+        	SS[i]= evaluate_bezier(SS[i],int(math.floor(length[i])))
 
         lst=SS[0]
-        # for i in range(len(length)-1):
-        # 	lst=np.vstack((lst,SS[i+1]))
+        for i in range(len(length)-1):
+        	lst=np.vstack((lst,SS[i+1]))
         
         StrokeSet=lst
 
-        x,y=StrokeSet[:,0],StrokeSet[:,1]
 
         #print(StrokeSet)
         minx = min(StrokeSet[:, 0])
@@ -107,40 +106,46 @@ def home():
 
         #print(minx,miny,maxx,maxy)
 
-        # StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-        # StrokeSet[:, 1] = StrokeSet[:, 1] - miny
+        StrokeSet[:, 0] = StrokeSet[:, 0] - minx
+        StrokeSet[:, 1] = StrokeSet[:, 1] - miny
 
-        # StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-        # StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
+        StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
+        StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
 
 
        
-        #print(StrokeSet.shape)
-        # StrokeSet=np.reshape(StrokeSet,(1,365,2))
+
+        StrokeSet=np.reshape(StrokeSet,(1,140,2))
 
 
 
-        char_map=[i for i in range(10)]
+        char_map=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+           'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','0','1','2','3','4','5','6','7','8','9']
 
-        AtoZ=list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-        atoz=list("abcdefghijklmnopqrstuvwxyz")
-        char_map.extend(AtoZ)
-        char_map.extend(atoz)
-
-        
+        # x,y=StrokeSet[:,0],StrokeSet[:,1]
         # print("plotting started")
         # plt.plot(x, y, 'r.')
-        # #plt.axis([0,1000,1000,0])
+        # #plt.axis([0,1,1,0])
         # plt.savefig('plot.png')
         # plt.close()
         # print("plotting done")
-        # #print(StrokeSet)
-        # # y=model.predict(StrokeSet)
+        # # #print(StrokeSet)
+        y=model.predict(StrokeSet)
 
-        # # y=np.array(y)
-        # # y=np.reshape(y,(62,))
-        # #print(y[np.argmax(y)]*100)
-        return "HEYY", 200
+        y=np.array(y)
+        y=y[0]
+       	
+        y=np.dstack((y,ii))
+        y=y[0].tolist()
+        y=sorted(y,reverse=True)
+        
+        output=""
+        for i in range(3):
+        	output+=str(char_map[int(y[i][1])])
+        	output+=" "
+        return output, 200
         
         
     return render_template('index.html',title='Home',character='default')

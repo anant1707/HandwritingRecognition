@@ -10,8 +10,13 @@ import keras
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+<<<<<<< Updated upstream
 model=keras.models.load_model("DL-part/Model/model_UJI2_bezier_140.h5")
 from scalefn import evaluate_bezier
+=======
+model=keras.models.load_model("DL-part/Model/model_merged_140.h5")
+from bezier import evaluate_bezier
+>>>>>>> Stashed changes
 from math import ceil,floor,factorial
 app = Flask(__name__)
 
