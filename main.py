@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 from builtins import str
 from flask import Flask,render_template,request,redirect,url_for,flash,session
 from flask_mysqldb import MySQL
-import mail
 import numpy as np
 from forms import ResetForm,RegistrationForm,LoginForm,EmptyForm,ForgotForm,NewPassForm,ChangePassword
 import os
@@ -20,6 +19,9 @@ from passlib.hash import pbkdf2_sha256
 import sms
 import random
 from datetime import date
+import matplotlib.pyplot as plt
+from math import factorial
+import math
 
 #model=keras.models.load_model("DL-part/Model/model_char74k.h5")
 app = Flask(__name__)
@@ -36,19 +38,67 @@ app.config['MYSQL_DB'] = 'hwr'
 mysql=MySQL(app)
 #HOMEPAGE
 
+def dataret(email):
+    cursor=mysql.connection.cursor()
+    cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='userinfo'")
+    list1 = [a[0] for a in cursor.fetchall()]
+    cursor.execute(f"SELECT * FROM userinfo where email='{email}'")
+    dict1 = dict(zip(tuple(list1), cursor.fetchone()))
+    return dict1
+
+
+def comb(n, k):
+    return factorial(n) // (factorial(k) * factorial(n - k))
+
+def get_bezier_curve(points):
+    n = len(points) - 1
+    return lambda t: sum(
+        comb(n, i) * t**i * (1 - t)**(n - i) * points[i]
+        for i in range(n + 1)
+    )
+
+def evaluate_bezier(points, total):
+    bezier = get_bezier_curve(points)
+    new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)])
+    return new_points
+
 @app.route('/',methods=['GET','POST'])
 def home():
     if(request.method=='POST'):
         res=request.get_json(force=True)
-        #print(res)
-        lst=[]
-        for stroke in res:
-            for c in stroke:
-                lst.append((float(c['x']),float(c['y'])))
-        
-        #print(lst)
 
-        StrokeSet=np.array(lst)
+        SS=[]
+
+        for stroke in res:
+        	lst=[]
+        	for c in stroke:
+        		lst.append([float(c['x']),float(c['y'])])
+        	SS.append(np.array(lst))
+
+        sum=0
+        sumi=0
+        length=[]
+        for i in SS:
+        	length.append(len(i))
+        	sum+=len(i)
+
+        for i in range(len(length)):
+        	length[i]=int((length[i]/sum)*80)
+        	sumi+=length[i]
+
+        length[-1]+=(80-sumi)
+
+        for i in range(len(length)):
+        	SS[i]= evaluate_bezier(SS[i],int(math.floor(80*length[i])))
+
+        lst=SS[0]
+        # for i in range(len(length)-1):
+        # 	lst=np.vstack((lst,SS[i+1]))
+        
+        StrokeSet=lst
+
+        x,y=StrokeSet[:,0],StrokeSet[:,1]
+
         #print(StrokeSet)
         minx = min(StrokeSet[:, 0])
         miny = min(StrokeSet[:, 1])
@@ -57,18 +107,17 @@ def home():
 
         #print(minx,miny,maxx,maxy)
 
-        StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-        StrokeSet[:, 1] = StrokeSet[:, 1] - miny
+        # StrokeSet[:, 0] = StrokeSet[:, 0] - minx
+        # StrokeSet[:, 1] = StrokeSet[:, 1] - miny
 
-        StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-        StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
+        # StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
+        # StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
 
 
-        if(len(StrokeSet)<365):
-            StrokeSet=np.vstack((StrokeSet,(np.zeros((365-len(StrokeSet),2)))))
-
+       
         #print(StrokeSet.shape)
-        StrokeSet=np.reshape(StrokeSet,(1,365,2))
+        # StrokeSet=np.reshape(StrokeSet,(1,365,2))
+
 
 
         char_map=[i for i in range(10)]
@@ -78,13 +127,20 @@ def home():
         char_map.extend(AtoZ)
         char_map.extend(atoz)
 
-        #print(StrokeSet)
-        y=model.predict(StrokeSet)
+        
+        # print("plotting started")
+        # plt.plot(x, y, 'r.')
+        # #plt.axis([0,1000,1000,0])
+        # plt.savefig('plot.png')
+        # plt.close()
+        # print("plotting done")
+        # #print(StrokeSet)
+        # # y=model.predict(StrokeSet)
 
-        y=np.array(y)
-        y=np.reshape(y,(62,))
-        #print(y[np.argmax(y)]*100)
-        return (str(char_map[np.argmax(y)])+str(y[np.argmax(y)]*100)), 200
+        # # y=np.array(y)
+        # # y=np.reshape(y,(62,))
+        # #print(y[np.argmax(y)]*100)
+        return "HEYY", 200
         
         
     return render_template('index.html',title='Home',character='default')
@@ -131,6 +187,8 @@ def plot():
 
     return render_template('index.html',title='Home',character='default')
 
+
+
 @app.route('/register',methods=['GET','POST'])
 def register():
     session.pop('logged-in',False)
@@ -158,15 +216,16 @@ def register():
                 cursor.execute(f"INSERT INTO USERINFO VALUES {tuple(regdata)}")
 
             except:
+                flash('Some Error Occured,Try Again!','danger')
                 return redirect(url_for('register'))
 
-            else:
-
-                session['log-in']='reg'
-                flash("Verify Otp!","info")
-                return redirect(url_for('resetpass'))
             mysql.connection.commit()
             cursor.close()
+            session['log-in']='reg'
+            session['phone'] = result['phone']
+            flash("Verify Otp!","info")
+            return redirect(url_for('resetpass'))
+                
         else:
             return render_template('register.html',form=form)
     else:
@@ -189,7 +248,7 @@ def login():
             if pbkdf2_sha256.verify(result['password'], a[0]):
                 session['logged-in']=True
                 session['email']=result['email']
-                return redirect(url_for('userhome'))
+                return redirect(url_for('home'))
 
             else:
                 flash("Incorrect Password!","danger")
@@ -202,11 +261,11 @@ def login():
 def forgot():
     session.pop('logged-in', False)
     form=ForgotForm()
-    cur = conn.cursor()
+    cursor = mysql.connection.cursor()
     if request.method == 'POST':
         phone=form.data['phone']
-        cur.execute(f"select email from userinfo where phone = '{phone}' ")
-        a=cur.fetchone()
+        cursor.execute(f"select email from userinfo where phone = '{phone}' ")
+        a=cursor.fetchone()
         if(a == None):
             flash("You are not registered!!,REGISTER NOW", 'danger')
             return redirect(url_for('register'))
@@ -220,6 +279,7 @@ def forgot():
 @app.route('/reset', methods=['GET', 'POST'])
 def resetpass():
     if(not session.get('phone')):
+        flash('Restricted','danger')
         return redirect(url_for('login'))
 
     form= ResetForm()
@@ -228,7 +288,7 @@ def resetpass():
         if ootp == session['otp']:
             if(session.get('log-in')=='reg'):
 
-                conn.commit()
+                mysql.connection.commit()
                 session.pop('log-in', None)
                 session.pop('phone', None)
 
@@ -269,7 +329,7 @@ def changepass():
                 cursor=mysql.connection.cursor()
                 newpassworda=pbkdf2_sha256.hash(form.password.data)
                 cursor.execute(f" UPDATE  userinfo  set passwordd = '{newpassworda}' where email='{session['email']}' ")
-                conn.commit()
+                mysql.connection.commit()
                 flash('Update successfull', 'success')
                 return redirect(url_for('userhome'))
             else:
@@ -281,7 +341,7 @@ def changepass():
 @app.route('/newpass', methods=['GET', 'POST'])
 def newpass():
     form=NewPassForm()
-    cur = conn.cursor()
+    cursor = mysql.connection.cursor()
     if request.method == 'POST':
         newpassword = form.data['password']
         confirmnewpassword = form.data['cpassword']
@@ -289,10 +349,10 @@ def newpass():
         if (newpassword == confirmnewpassword):
             newpassworda = pbkdf2_sha256.hash(newpassword)
 
-            cur.execute(f" UPDATE  userinfo  set passwordd = '{newpassworda}' where email =  '{session['email']}' ")
-            conn.commit()
+            cursor.execute(f" UPDATE  userinfo  set passwordd = '{newpassworda}' where email =  '{session['email']}' ")
+            mysql.connection.commit()
             session['logged-in']=True
-            return redirect(url_for('userhome'))
+            return redirect(url_for('home'))
         else:
             flash("passwords didnt match", 'danger')
             return redirect(url_for('newpass'))
@@ -303,7 +363,7 @@ def logout():
     session.pop('email', None)
     session.pop('logged-in', False)
     session.pop('phone', None)
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
