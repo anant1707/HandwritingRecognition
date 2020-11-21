@@ -6,7 +6,7 @@ def autocorrect(word):
 	# find those words that may be misspelled
 	misspelled = spell.unknown(word)
 
-	
+	e=0
 	a=spell.correction(word)
 	print(a)
 	return a
