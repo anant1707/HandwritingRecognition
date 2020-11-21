@@ -25,6 +25,7 @@ app.config['SECRET_KEY'] = 'AjJ0lXaX5K9tai8QsUhwwQ'
 
 @app.route('/',methods=['GET','POST'])
 def home():
+	wqw=0
     if(request.method=='POST'):
         resi=request.get_json(force=True)
         #print(res)
