@@ -9,7 +9,7 @@ Created on Thu Nov 12 20:35:51 2020
 #import keras
 import matplotlib.pyplot as plt
 from builtins import str
-from flask import Flask,render_template,request,redirect,url_for,flash,session
+from flask import Flask,render_template,request,redirect,url_for,flash,session,jsonify
 from flask_mysqldb import MySQL
 import numpy as np
 from forms import ResetForm,RegistrationForm,LoginForm,EmptyForm,ForgotForm,NewPassForm,ChangePassword
@@ -20,10 +20,11 @@ import sms
 import random
 from datetime import date
 import matplotlib.pyplot as plt
-from math import factorial
+from math import ceil,floor,factorial
 import math
+from bezier import evaluate_bezier
 
-#model=keras.models.load_model("DL-part/Model/model_char74k.h5")
+#model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
 app = Flask(__name__)
 #=============================================================================
 #MYSQL CONFIGURATION
@@ -37,7 +38,13 @@ app.config['MYSQL_PASSWORD'] = 'Anant@1707'
 app.config['MYSQL_DB'] = 'hwr'
 mysql=MySQL(app)
 #HOMEPAGE
+char_map=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+           'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+           'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','0','1','2','3','4','5','6','7','8','9']
 
+
+ii=np.array([i for i in range(62)])
 def dataret(email):
     cursor=mysql.connection.cursor()
     cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='userinfo'")
@@ -46,24 +53,23 @@ def dataret(email):
     dict1 = dict(zip(tuple(list1), cursor.fetchone()))
     return dict1
 
+def show_first(y,l):
+	result=""
+	for i in range(l):
+		if(y[i][0]>0.3):
+			result+=(char_map[int(y[i][1])]+" ")
+	return result
 
-def comb(n, k):
-    return factorial(n) // (factorial(k) * factorial(n - k))
-
-def get_bezier_curve(points):
-    n = len(points) - 1
-    return lambda t: sum(
-        comb(n, i) * t**i * (1 - t)**(n - i) * points[i]
-        for i in range(n + 1)
-    )
-
-def evaluate_bezier(points, total):
-    bezier = get_bezier_curve(points)
-    new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)])
-    return new_points
-
-@app.route('/',methods=['GET','POST'])
+@app.route('/')
 def home():
+	form=EmptyForm()
+	if(session.get('logged-in')):
+		return redirect(url_for('userhome'))
+	else:
+		return render_template('index.html',form=form)
+
+@app.route('/letter',methods=['GET','POST'])
+def letter():
     if(request.method=='POST'):
         res=request.get_json(force=True)
 
@@ -83,21 +89,20 @@ def home():
         	sum+=len(i)
 
         for i in range(len(length)):
-        	length[i]=int((length[i]/sum)*80)
+        	length[i]=int((length[i]/sum)*140)
         	sumi+=length[i]
 
-        length[-1]+=(80-sumi)
+        length[-1]+=(140-sumi)
 
         for i in range(len(length)):
-        	SS[i]= evaluate_bezier(SS[i],int(math.floor(80*length[i])))
+        	SS[i]= evaluate_bezier(SS[i],int(math.floor(length[i])))
 
         lst=SS[0]
-        # for i in range(len(length)-1):
-        # 	lst=np.vstack((lst,SS[i+1]))
+        for i in range(len(length)-1):
+        	lst=np.vstack((lst,SS[i+1]))
         
         StrokeSet=lst
 
-        x,y=StrokeSet[:,0],StrokeSet[:,1]
 
         #print(StrokeSet)
         minx = min(StrokeSet[:, 0])
@@ -107,43 +112,150 @@ def home():
 
         #print(minx,miny,maxx,maxy)
 
-        # StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-        # StrokeSet[:, 1] = StrokeSet[:, 1] - miny
+        StrokeSet[:, 0] = StrokeSet[:, 0] - minx
+        StrokeSet[:, 1] = StrokeSet[:, 1] - miny
 
-        # StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-        # StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
+        StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
+        StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
 
 
        
-        #print(StrokeSet.shape)
-        # StrokeSet=np.reshape(StrokeSet,(1,365,2))
+        xx,yy=StrokeSet[:,0],StrokeSet[:,1]
+        StrokeSet=np.reshape(StrokeSet,(1,140,2))
 
-
-
-        char_map=[i for i in range(10)]
-
-        AtoZ=list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-        atoz=list("abcdefghijklmnopqrstuvwxyz")
-        char_map.extend(AtoZ)
-        char_map.extend(atoz)
 
         
-        # print("plotting started")
-        # plt.plot(x, y, 'r.')
-        # #plt.axis([0,1000,1000,0])
-        # plt.savefig('plot.png')
-        # plt.close()
-        # print("plotting done")
-        # #print(StrokeSet)
-        # # y=model.predict(StrokeSet)
+        print("plotting started")
+        plt.plot(xx, yy, 'r')
+        plt.axis([0,1,1,0])
+        plt.savefig('plot.png')
+        plt.close()
+        print("plotting done")
+        # # #print(StrokeSet)
+        y=model.predict(StrokeSet)
 
-        # # y=np.array(y)
-        # # y=np.reshape(y,(62,))
-        # #print(y[np.argmax(y)]*100)
-        return "HEYY", 200
+        y=np.array(y)
+        y=y[0]
+       	
+        y=np.dstack((y,ii))
+        y=y[0].tolist()
+        y=sorted(y,reverse=True)
+        
+        output=""
+        for i in range(3):
+        	output+=str(char_map[int(y[i][1])])
+        	output+=" "
+        return output, 200
         
         
     return render_template('index.html',title='Home',character='default')
+
+@app.route('/word',methods=['GET','POST'])
+def word():
+	if(request.method=='POST'):
+		resi=request.get_json(force=True)
+		#print(res)
+		char_strokes=[]
+		prevmaxx=-1
+		prevminx=1300
+		prev_stroke_set=[]
+		first=False
+
+
+		for stroke in resi:
+			lst=[]
+			
+			for c in stroke:
+				lst.append([float(c['x']),float(c['y'])])
+
+				StrokeSet=np.array(lst)
+
+
+				minx = min(StrokeSet[:, 0])
+
+				maxx = max(StrokeSet[:, 0])
+			if((minx<prevmaxx and minx>prevminx  ) or(maxx>prevminx and maxx<prevmaxx)or(minx<prevminx and maxx>prevmaxx) or (minx>prevminx and maxx<prevmaxx)or (minx<prevminx and maxx>prevmaxx)):
+				prev_stroke_set.append(StrokeSet)
+				prevmaxx=max(maxx,prevmaxx)
+				prevminx=min(minx,prevminx)
+			else:
+				first=True
+				char_strokes.append(prev_stroke_set)
+
+				prev_stroke_set=[]
+				prev_stroke_set.append(StrokeSet)
+				prevmaxx=maxx
+				prevminx=minx
+                
+                
+		char_strokes.append(prev_stroke_set)
+		word=""
+
+		for res in char_strokes:
+			SS=[]
+
+			for stroke in res:
+				lst=stroke
+				
+				SS.append(np.array(lst))
+    
+			sum=0
+			sumi=0
+			length=[]
+			for i in SS:
+				length.append(len(i))
+				sum+=len(i)
+
+			for i in range(len(length)):
+				length[i]=int((length[i]/sum)*140)
+				sumi+=length[i]
+			sumi=sumi-length[-1]
+
+			length[-1]=140-sumi
+			for i in range(len(length)):
+				SS[i]= evaluate_bezier(SS[i],length[i])
+
+			lst=SS[0]
+			for i in range(len(length)-1):
+				lst=np.vstack((lst,SS[i+1]))
+
+			StrokeSet=lst
+
+			x,y=StrokeSet[:,0],StrokeSet[:,1]
+
+
+			minx = min(StrokeSet[:, 0])
+			miny = min(StrokeSet[:, 1])
+			maxx = max(StrokeSet[:, 0])
+			maxy = max(StrokeSet[:, 1])
+			StrokeSet[:, 0] = StrokeSet[:, 0] - minx
+			StrokeSet[:, 1] = StrokeSet[:, 1] - miny
+
+			StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
+			StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
+
+			StrokeSet=np.reshape(StrokeSet,(1,140,2))
+			y=model.predict(StrokeSet)
+			y=np.array(y)
+			y=y[0]
+
+			y=np.dstack((y,ii))
+			y=y[0].tolist()
+			y=sorted(y,reverse=True)
+
+			word+=char_map[int(y[0][1])]
+			if(y[0][0]>0.9):
+				print(show_first(y,1))
+			else:
+				print(show_first(y,2))
+		return (word)
+        
+        
+	return render_template('index.html',title='Home',character='default')
+   # 90+  1
+           # 75-90 2
+           # 50+ 3
+           # <50 4
 
 @app.route('/plot',methods=['GET','POST'])
 def plot():
@@ -187,7 +299,13 @@ def plot():
 
     return render_template('index.html',title='Home',character='default')
 
-
+@app.route('/userhome')
+def userhome():
+    if(not session.get('logged-in')):
+        flash('LOGIN to continue','danger')
+        return redirect(url_for('login'))
+    form=EmptyForm()
+    return render_template('userhome.html',form=form,title="HOME")
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -248,7 +366,7 @@ def login():
             if pbkdf2_sha256.verify(result['password'], a[0]):
                 session['logged-in']=True
                 session['email']=result['email']
-                return redirect(url_for('home'))
+                return redirect(url_for('userhome'))
 
             else:
                 flash("Incorrect Password!","danger")
@@ -272,6 +390,7 @@ def forgot():
         else:
             session['phone'] = phone
             session['logged-in']=False
+            session['email']=a[0]
             return redirect(url_for('resetpass'))
 
     return render_template('forgot.html',form=form)

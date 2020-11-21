@@ -1,0 +1,17 @@
+{%extends "base.html"%}
+{%block title%}
+<title>{{title}}</title>
+{%endblock title%}
+{%block content%}
+    <main class="page landing-page">
+        <section class="clean-block clean-hero">
+            <textarea id="txtarea" cols="50" rows="30" style="  border: 2px outset black; margin: 0px; resize: none; font-size: 50px;font-family: Times new Roman;"  ></textarea>
+
+
+			<canvas id="line-input" style="position: fixed; border:2px outset black"></canvas>
+        </section>
+
+{%endblock content%}
+{%block script%}
+<script src="static/js/line-input.js"></script>
+{% endblock script%}

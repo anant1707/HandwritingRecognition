@@ -1,88 +1,16 @@
-<html>
-    <head>
-        <title>{{title}}</title>
-        <link rel="stylesheet" href="static/CSS/style.css">
-      </head>
-    <body>
-      <div class="ink-toolbar" id="toolbar">
-        <div class="ink-toolbar-begin">
-
-
-          <div class="ink-button-container">
-            <button class="ink-button" onclick="selectPen();" id="pen-button">
-              <img src="static/EXTERNAL/ICONS/create-icon.svg">
-            </button>
-            <div id="sections_panel">
-              <div>
-              <label for="color_picker">Choose Color</label>
-              <input type="color" id="color_picker">
-              
-              <br>
-              <br>
-              <hr>
-              <label for="brush_size">Select Brush Size</label>
-              <br>
-              <input type="range" id="brush_size">
-            </div>
-            </div>
-          </div>
-          
-          <div class="ink-button-container">
-            <button class="ink-button" onclick="selectEraser();" id="eraser-button">
-              <img src="static/EXTERNAL/ICONS/eraser-icon.svg" height="24px" width="24px">
-            </button>
-            <div id="sections_panel_1">
-              <div>
-                <label for="brush_size">Select Eraser Size</label>
+{%extends "base.html"%}
+{%block title%}
+<title>{{title}}</title>
+{%endblock title%}
+{%block content%}
+    <main class="page landing-page">
+        <section class="clean-block clean-hero" style="background-image:url('/static/img/background.jpg');color:rgba(0, 0, 0, 0.55);">
+            <div class="text">
+                <h1>Welcome to HWR!</h1>
                 <br>
-                <input type="range" id="eraser_size">
-              </div>
+                <a href="/login"><button class="btn btn-outline-light btn-lg" type="button">Login</button></a>
+                <a href="/register"><button class="btn btn-outline-light btn-lg" type="button" >Sign Up</button></a>
             </div>
-          </div>
+        </section>
 
-          <div class="ink-button-container">
-            <button class="ink-button" onclick="ClearAll();">
-              <img src="static/EXTERNAL/ICONS/clear_all-icon.svg">
-            </button>
-          </div>
-
-          </div>
-
-          <div class="ink-toolbar-end">
-            
-            <div class="ink-button-container">
-              <button class="ink-button" onclick="undo();" id="undo-button">
-                <img src="static/EXTERNAL/ICONS/undo-icon.svg">
-              </button>
-            </div>
-
-            <div class="ink-button-container">
-              <button class="ink-button" onclick="redo();" id="redo-button">
-                <img src="static/EXTERNAL/ICONS/redo-icon.svg">
-              </button>
-            </div>
-
-            
-            <div class="ink-button-container">
-              <button class="ink-button" onclick="save();">
-                <img src="static/EXTERNAL/ICONS/save-icon.svg">
-              </button>
-            </div>
-
-            <div class="ink-button-container">
-              <button onclick="plot();">
-                Plot
-              </button>
-            </div>
-
-            </div>
-        
-          </div>
-          <div id="sketching_area">
-            <h1 id="output">{{character}}</h1>
-    <canvas id="mainboard" style="position: fixed;"></canvas>
-  </div>
-    
-    </body>
-    <script src="static/JS/index.js"></script>
-</html>
+{%endblock content%}
