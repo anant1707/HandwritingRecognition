@@ -130,7 +130,7 @@ function mouse_draw(e)
      }
    else
    {
-      //ctx.clearRect(e.clientX-eraser_size, e.clientY-eraser_size-56, 2*eraser_size, 2*eraser_size);
+      ctx.clearRect(e.clientX-eraser_size, e.clientY-eraser_size-56, 2*eraser_size, 2*eraser_size);
       //its still an issue
    }
 
@@ -251,7 +251,9 @@ function selectEraser()
 
 function save()
 {
-   fetch('/',{
+   var fname=prompt("Enter File Name")
+   points.push({filename:fname})
+   fetch('/WBO',{
       method:"POST",
       headers: {
          "content-type":"application/json"
@@ -264,8 +266,8 @@ function save()
      
   
       // Should be 'OK' if everything was successful
-      document.getElementById('output').innerHTML=text;
   });
+  points.pop();
 	//console.log(points);
    collapse_menus();
    //ipc.send('save-this-file',points);

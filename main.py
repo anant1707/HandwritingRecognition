@@ -18,10 +18,11 @@ from flask_wtf.file import FileField,FileAllowed
 from passlib.hash import pbkdf2_sha256
 import sms
 import random
-from datetime import date
+from datetime import datetime,date
 import matplotlib.pyplot as plt
 from math import ceil,floor,factorial
 import math
+import json
 from bezier import evaluate_bezier
 
 #model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
@@ -68,237 +69,6 @@ def home():
 	else:
 		return render_template('index.html',form=form)
 
-@app.route('/letter',methods=['GET','POST'])
-def letter():
-    if(request.method=='POST'):
-        res=request.get_json(force=True)
-
-        SS=[]
-
-        for stroke in res:
-        	lst=[]
-        	for c in stroke:
-        		lst.append([float(c['x']),float(c['y'])])
-        	SS.append(np.array(lst))
-
-        sum=0
-        sumi=0
-        length=[]
-        for i in SS:
-        	length.append(len(i))
-        	sum+=len(i)
-
-        for i in range(len(length)):
-        	length[i]=int((length[i]/sum)*140)
-        	sumi+=length[i]
-
-        length[-1]+=(140-sumi)
-
-        for i in range(len(length)):
-        	SS[i]= evaluate_bezier(SS[i],int(math.floor(length[i])))
-
-        lst=SS[0]
-        for i in range(len(length)-1):
-        	lst=np.vstack((lst,SS[i+1]))
-        
-        StrokeSet=lst
-
-
-        #print(StrokeSet)
-        minx = min(StrokeSet[:, 0])
-        miny = min(StrokeSet[:, 1])
-        maxx = max(StrokeSet[:, 0])
-        maxy = max(StrokeSet[:, 1])
-
-        #print(minx,miny,maxx,maxy)
-
-        StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-        StrokeSet[:, 1] = StrokeSet[:, 1] - miny
-
-        StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-        StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
-
-
-       
-        xx,yy=StrokeSet[:,0],StrokeSet[:,1]
-        StrokeSet=np.reshape(StrokeSet,(1,140,2))
-
-
-        
-        print("plotting started")
-        plt.plot(xx, yy, 'r')
-        plt.axis([0,1,1,0])
-        plt.savefig('plot.png')
-        plt.close()
-        print("plotting done")
-        # # #print(StrokeSet)
-        y=model.predict(StrokeSet)
-
-        y=np.array(y)
-        y=y[0]
-       	
-        y=np.dstack((y,ii))
-        y=y[0].tolist()
-        y=sorted(y,reverse=True)
-        
-        output=""
-        for i in range(3):
-        	output+=str(char_map[int(y[i][1])])
-        	output+=" "
-        return output, 200
-        
-        
-    return render_template('index.html',title='Home',character='default')
-
-@app.route('/word',methods=['GET','POST'])
-def word():
-	if(request.method=='POST'):
-		resi=request.get_json(force=True)
-		#print(res)
-		char_strokes=[]
-		prevmaxx=-1
-		prevminx=1300
-		prev_stroke_set=[]
-		first=False
-
-
-		for stroke in resi:
-			lst=[]
-			
-			for c in stroke:
-				lst.append([float(c['x']),float(c['y'])])
-
-				StrokeSet=np.array(lst)
-
-
-				minx = min(StrokeSet[:, 0])
-
-				maxx = max(StrokeSet[:, 0])
-			if((minx<prevmaxx and minx>prevminx  ) or(maxx>prevminx and maxx<prevmaxx)or(minx<prevminx and maxx>prevmaxx) or (minx>prevminx and maxx<prevmaxx)or (minx<prevminx and maxx>prevmaxx)):
-				prev_stroke_set.append(StrokeSet)
-				prevmaxx=max(maxx,prevmaxx)
-				prevminx=min(minx,prevminx)
-			else:
-				first=True
-				char_strokes.append(prev_stroke_set)
-
-				prev_stroke_set=[]
-				prev_stroke_set.append(StrokeSet)
-				prevmaxx=maxx
-				prevminx=minx
-                
-                
-		char_strokes.append(prev_stroke_set)
-		word=""
-
-		for res in char_strokes:
-			SS=[]
-
-			for stroke in res:
-				lst=stroke
-				
-				SS.append(np.array(lst))
-    
-			sum=0
-			sumi=0
-			length=[]
-			for i in SS:
-				length.append(len(i))
-				sum+=len(i)
-
-			for i in range(len(length)):
-				length[i]=int((length[i]/sum)*140)
-				sumi+=length[i]
-			sumi=sumi-length[-1]
-
-			length[-1]=140-sumi
-			for i in range(len(length)):
-				SS[i]= evaluate_bezier(SS[i],length[i])
-
-			lst=SS[0]
-			for i in range(len(length)-1):
-				lst=np.vstack((lst,SS[i+1]))
-
-			StrokeSet=lst
-
-			x,y=StrokeSet[:,0],StrokeSet[:,1]
-
-
-			minx = min(StrokeSet[:, 0])
-			miny = min(StrokeSet[:, 1])
-			maxx = max(StrokeSet[:, 0])
-			maxy = max(StrokeSet[:, 1])
-			StrokeSet[:, 0] = StrokeSet[:, 0] - minx
-			StrokeSet[:, 1] = StrokeSet[:, 1] - miny
-
-			StrokeSet[:, 0] = StrokeSet[:, 0] / (maxx-minx)
-			StrokeSet[:, 1] = StrokeSet[:, 1] / (maxy-miny)
-
-			StrokeSet=np.reshape(StrokeSet,(1,140,2))
-			y=model.predict(StrokeSet)
-			y=np.array(y)
-			y=y[0]
-
-			y=np.dstack((y,ii))
-			y=y[0].tolist()
-			y=sorted(y,reverse=True)
-
-			word+=char_map[int(y[0][1])]
-			if(y[0][0]>0.9):
-				print(show_first(y,1))
-			else:
-				print(show_first(y,2))
-		return (word)
-        
-        
-	return render_template('index.html',title='Home',character='default')
-   # 90+  1
-           # 75-90 2
-           # 50+ 3
-           # <50 4
-
-@app.route('/plot',methods=['GET','POST'])
-def plot():
-    if(request.method=='POST'):
-        res=request.get_json(force=True)
-        
-        points=[]
-        for stroke in res:
-            for c in stroke:
-                points.append((float(c['x']),float(c['y'])))
-
-        StrokeSet=np.array(points)
-        #print(StrokeSet)
-        minx = min(StrokeSet[:, 0])
-        miny = min(StrokeSet[:, 1])
-        maxx = max(StrokeSet[:, 0])
-        maxy = max(StrokeSet[:, 1])
-
-        #print(minx,miny,maxx,maxy)
-
-        points=sorted(points)
-        # print(points)
-        x=[]
-        y=[]
-        dictionary={}
-        for c in points:
-            if(c[0] in dictionary):
-                dictionary[c[0]]=min(dictionary[c[0]],c[1])
-            else:
-                dictionary[c[0]]=c[1]
-
-        for i in sorted(dictionary.keys()):
-            x.append((i-minx)/(maxx-minx))
-            y.append(0.5)
-        #print(x,y)
-
-        plt.scatter(x,y)
-        plt.axis([0,1,1,0])
-        plt.savefig('plot.png')
-        plt.close()
-
-    return render_template('index.html',title='Home',character='default')
-
 @app.route('/userhome')
 def userhome():
     if(not session.get('logged-in')):
@@ -306,6 +76,103 @@ def userhome():
         return redirect(url_for('login'))
     form=EmptyForm()
     return render_template('userhome.html',form=form,title="HOME")
+
+@app.route('/RTHWR')
+def RTHWR():
+    form=EmptyForm()
+    if(not session.get('logged-in')):
+        flash('LOGIN first','danger')
+        return redirect(url_for('login'))
+    else:
+        return render_template('splitup.html',form=form,title="Real Time Recognition")
+
+@app.route('/WBOhead')
+def WBOhead():
+    form=EmptyForm()
+    if(not session.get('logged-in')):
+        flash('LOGIN first','danger')
+        return redirect(url_for('login'))
+    else:
+        cursor=mysql.connection.cursor()
+        cursor.execute(f"select * from wbd where owned='{session['email']}' order by date_modified desc")
+        a=cursor.fetchall()
+        #print(a)
+        foldername=session['email'].lower().split('@')
+        foldername=foldername[0]+foldername[1][:-4]
+        path=f"media/wbd/{foldername}"
+        return render_template('wbohead.html',form=form,title="Whiteboard",d=a,path=path)
+@app.route('/WBO', methods=['GET','POST'])
+def WBO():
+    if(not session.get('logged-in')):
+        flash('LOGIN first','danger')
+        return redirect(url_for('login'))
+    cursor=mysql.connection.cursor()
+
+#saving
+    if request.method=='POST':
+        res=request.get_json(force=True)
+
+        foldername=session['email'].lower().split('@')
+        foldername=foldername[0]+foldername[1][:-4]
+        path=os.path.join(os.getcwd(),'static\\media\\wbd',foldername)
+
+
+        if(not os.path.exists(path)):
+            os.mkdir(path)
+
+        drawing=dict()
+        for i in range(len(res)-1):
+            drawing[f"stroke{i}"]=res[i]
+        
+        filename=res[-1]['filename']
+        # print(filename)
+        now=datetime.now()
+        noww=now.strftime("%Y-%m-%d %H:%M:%S")
+        with open(f'{path}/{filename}.json', 'w') as json_file:
+            json.dump(drawing, json_file)
+
+        cursor.execute(f"select filename from wbd where filename='{filename}' and owned='{session['email'].lower()}'")
+        a=cursor.fetchone()
+        if a is None:
+            cursor.execute(f"insert into wbd values('{session['email'].lower()}','{filename}','{noww}')")
+        else:
+            cursor.execute(f"update wbd set date_modified='{noww}' where owned='{session['email'].lower()}'")
+    mysql.connection.commit()
+        
+
+    if(request.args.get('action')):
+        action=request.args.get('action')
+        if action=="create-new":
+            return render_template("whiteboard.html")
+        else:
+
+            filename=request.args.get('filename')
+            foldername=session['email'].split('@')
+            foldername=foldername[0]+foldername[1][:-4]
+            path=os.path.join(os.getcwd(),'static\\media\\wbd',foldername)
+            
+
+            if(action=='delete'):
+                
+                print(os.path.join(path,filename))
+                if(os.path.exists(os.path.join(path,f"{filename}.json"))):
+                    os.remove(os.path.join(path,f"{filename}.json"))
+                    cursor.execute(f"delete from wbd where owned='{session['email'].lower()}' and filename='{filename}'")
+                    mysql.connection.commit()
+                
+            if(action=='open'):
+                    pass
+     
+    return redirect(url_for('WBOhead'))
+
+@app.route('/uploadpdf')
+def uploadpdf():
+    form=EmptyForm()
+    if(not session.get('logged-in')):
+        flash('LOGIN first','danger')
+        return redirect(url_for('login'))
+    else:
+        return render_template('uploadpdf.html',form=form,title="Convert from File")
 
 @app.route('/register',methods=['GET','POST'])
 def register():

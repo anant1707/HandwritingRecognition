@@ -4,11 +4,12 @@ const ctx=canvas.getContext("2d");
 
 
 
-canvas.width=window.innerWidth;
-canvas.height=(window.innerHeight * 0.35);
-txtarea.style.setProperty('width',`${window.innerWidth}px`,'');
+canvas.width=window.innerWidth-8;
+canvas.height=(window.innerHeight * 0.5);
+txtarea.style.setProperty('width',`${window.innerWidth-15}px`,'');
 txtarea.style.setProperty('height',`${window.innerHeight-canvas.height}px`,'');
 
+alert("Shortcuts\n1. Undo- Ctrl+Z\n2. Redo- Ctrl+Y \n3. Clear all- Ctrl+delete ");
 
 var is_drawing=false;
 
@@ -27,12 +28,10 @@ ctx.lineCap="round";
 ctx.strokeStyle=pen_colour;//default
 ctx.lineJoin='round';
 
-
 function mouse_start_draw(e)
 {
    is_drawing=true;
    ctx.beginPath();
-   current_stroke=[];
    redo_stack=[];
    current_stroke.push
    (
@@ -47,13 +46,6 @@ function mouse_start_draw(e)
 function mouse_stop_draw(e)
 {
    is_drawing=false;
-   current_stroke.push
-   (
-      {
-         x:e.offsetX,
-         y:e.offsetY
-      }
-   );
 
    points.push(current_stroke);
    current_stroke=[];
@@ -100,12 +92,15 @@ function redo()
 
 function redraw_all()
 {
-   ctx.beginPath()
    ctx.clearRect(0,0,canvas.width,canvas.height);
    for (var i=0; i<points.length; i++)
    {
-    ctx.lineTo(points[i].x,points[i].y);
-    ctx.stroke();
+      ctx.beginPath();
+      for (var c=0;c<points[i].length;c++)
+      {
+         ctx.lineTo(points[i][c].x,points[i][c].y);
+         ctx.stroke();
+      }
    }
 }
 
@@ -115,7 +110,32 @@ function ClearAll()
    points=[];
 }
 
+function shortcuts(e)
+{
+   if(e.ctrlKey && e.keyCode==90)
+   {
+      undo();
+   }
+   if(e.ctrlKey && e.keyCode==89)
+   {
+      redo();
+   }
+   if(e.ctrlKey && e.keyCode==46)
+   {
+      ClearAll();
+   } 
+   if(e.keyCode==32)
+   {
+      //convert
+   }
+}
 
 canvas.addEventListener("mousedown",mouse_start_draw);
 canvas.addEventListener("mouseup",mouse_stop_draw);
 canvas.addEventListener("mousemove",mouse_draw);
+canvas.addEventListener("mouseenter",function()
+{
+   
+      canvas.style.setProperty("cursor","url('static/external/CURSORS/dot.cur'), auto","")
+})
+document.addEventListener('keyup',shortcuts,false);
