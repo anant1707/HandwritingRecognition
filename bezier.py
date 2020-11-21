@@ -15,19 +15,5 @@ def get_bezier_curve(points):
 def evaluate_bezier(points, total):
     bezier = get_bezier_curve(points)
     new_points = np.array([bezier(t) for t in np.linspace(0, 1, total)])
-    return new_points[:,0], new_points[:,1]
+    return new_points
 
-points = np.array(
-[[1.,2.],
-[2.,3.],
-[9.,2.],
-[1.,2.]
-]
-)
-
-x, y = points[:,0], points[:,1]
-bx, by = evaluate_bezier(points, 70)
-print(bx,by)
-plt.plot(bx, by, 'b-')
-plt.plot(x, y, 'r-')
-plt.show()

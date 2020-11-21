@@ -19,17 +19,17 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-dark navbar-expand-lg fixed-top bg-dark clean-navbar" style="padding-top:0.5rem;padding-bottom:0.5rem;">
-        <div class="container"><a class="navbar-brand logo" href="/">FarmBid</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+    <nav class="navbar navbar-dark navbar-expand-lg fixed-top bg-dark clean-navbar">
+        <div class="container"><a class="navbar-brand logo" href="/">HWR</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse"
                 id="navcol-1">
                 <ul class="nav navbar-nav ml-auto">
                     {% if session.get('logged-in') %}
-                    
 
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/logout">Logout</a></li>
+                    {%else%}
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/login">Login</a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/register">Register</a></li>
-
                     {% endif %}
                 </ul>
             </div>
@@ -40,5 +40,6 @@
     {%block content%}
     {% endblock content%}
 </body>
-
+{%block script%}
+{% endblock script%}
 </html>
