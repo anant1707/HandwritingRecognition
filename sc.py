@@ -8,7 +8,7 @@ def autocorrect(word):
 
 
 	a=spell.correction(word)
-	print(a)
+	
 	return a
 
 	    # Get a list of `likely` options
