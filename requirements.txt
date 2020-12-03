@@ -7,3 +7,4 @@ spellchecker
 pyspellchecker
 flask_wtf
 passlib
+email_validator
