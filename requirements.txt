@@ -1,0 +1,9 @@
+keras
+matplotlib
+flask
+pyodbc
+numpy
+spellchecker
+pyspellchecker
+flask_wtf
+passlib

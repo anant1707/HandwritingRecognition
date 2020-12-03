@@ -6,7 +6,7 @@ Created on Thu Nov 12 20:35:51 2020
 """
 
 
-import keras
+# import keras
 import matplotlib.pyplot as plt
 from builtins import str
 from flask import Flask,render_template,request,redirect,url_for,flash,session,jsonify
@@ -19,7 +19,6 @@ from passlib.hash import pbkdf2_sha256
 import sms
 import random
 from datetime import datetime,date
-import matplotlib.pyplot as plt
 from math import ceil,floor,factorial
 import math
 import json
@@ -27,7 +26,7 @@ from bezier import evaluate_bezier
 from sc import autocorrect
 from azure_api_call import get_text
 
-model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
+# model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
 
 app = Flask(__name__)
 #=============================================================================
