@@ -27,7 +27,7 @@ from bezier import evaluate_bezier
 from sc import autocorrect
 from azure_api_call import get_text
 
-#model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
+model=keras.models.load_model("DL-part/model_74k_140.h5")
 
 app = Flask(__name__)
 #=============================================================================
