@@ -10,8 +10,8 @@ import keras
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-model=keras.models.load_model("DL-part/Model/model_UJI2_bezier_140.h5")
-from scalefn import evaluate_bezier
+model=keras.models.load_model("DL-part/Model/model_74k_140.h5")
+from bezier import evaluate_bezier
 from math import ceil,floor,factorial
 from sc import autocorrect
 app = Flask(__name__)
@@ -169,7 +169,7 @@ def home():
         return (sentence)
         
         
-    return render_template('index.html',title='Home',character='default')
+    return render_template('whiteboard.html',title='Home',character='default')
 
 @app.route('/plot',methods=['GET','POST'])
 def plot():

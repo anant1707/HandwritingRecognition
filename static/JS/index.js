@@ -17,7 +17,7 @@ var is_drawing=false;
 var is_pen=true;
 
 // Containers for storing coordinates
-var points=[];
+
 var redo_stack=[];
 var current_stroke=[];
 
@@ -201,7 +201,7 @@ function redraw_all()
 function ClearAll()
 {
    collapse_menus();
-   console.log(points);
+   console.log(document.getElementById('data').innerHTML)
    ctx.clearRect(0,0,canvas.width,canvas.height);
    points=[];
    
@@ -251,9 +251,8 @@ function selectEraser()
 
 function save()
 {
-   var fname=prompt("Enter File Name")
-   points.push({filename:fname})
-   fetch('/WBO',{
+   
+   fetch('/',{
       method:"POST",
       headers: {
          "content-type":"application/json"
@@ -264,7 +263,7 @@ function save()
   }).then(function (text) {
   
      
-  
+    document.getElementById('output').innerHTML=text;
       // Should be 'OK' if everything was successful
   });
   points.pop();
@@ -272,16 +271,7 @@ function save()
    collapse_menus();
    //ipc.send('save-this-file',points);
 }
-function plot()
-{
-   fetch('/plot',{
-      method:"POST",
-      headers: {
-         "content-type":"application/json"
-      },
-      body:JSON.stringify(points)
-   })
-}
+
 
 tcanvas.addEventListener("mousedown",mouse_start_draw);
 tcanvas.addEventListener("mouseup",mouse_stop_draw);
@@ -305,3 +295,9 @@ colorButton.onchange = function() {
    console.log(colorButton.value);
    tctx.strokeStyle=colorButton.value;
 }
+window.onbeforeunload = function() { return "Your work will be lost."; };
+canvas.addEventListener("mouseenter",function()
+{
+   
+      canvas.style.setProperty("cursor","url('static/external/CURSORS/dot.cur'), auto","")
+})

@@ -25,11 +25,11 @@ def ocr_azure():
             poll = False
     return analysis
 #
-def get_text(path):
-    from pdf2image import convert_from_path
+def get_text(file):
+    from pdf2image import convert_from_bytes
     import requests
     
-    images=convert_from_path(path)
+    images=convert_from_bytes(file.read())
     ocr_text=""
     for temp_image in images:
         temp_image.save("temp.jpeg")
@@ -37,7 +37,6 @@ def get_text(path):
         lines=json_file['analyzeResult']['readResults'][0]['lines']
         for line in lines:
             ocr_text=ocr_text+line['text']+" "
+        ocr_text+="\n\n"
     return ocr_text
 
-
-print(get_text("rahul_asg.pdf"))

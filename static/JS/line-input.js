@@ -9,7 +9,7 @@ canvas.height=(window.innerHeight * 0.5);
 txtarea.style.setProperty('width',`${window.innerWidth-15}px`,'');
 txtarea.style.setProperty('height',`${window.innerHeight-canvas.height}px`,'');
 
-alert("Shortcuts\n1. Undo- Ctrl+Z\n2. Redo- Ctrl+Y \n3. Clear all- Ctrl+delete ");
+alert("Shortcuts\n1. Undo- Ctrl+Z\n2. Redo- Ctrl+Y \n3. Clear all- Ctrl+delete");
 
 var is_drawing=false;
 
@@ -110,6 +110,25 @@ function ClearAll()
    points=[];
 }
 
+function convert()
+{
+   fetch('/RTHWR',{
+      method:"POST",
+      headers: {
+         "content-type":"application/json"
+      },
+      body:JSON.stringify(points)
+   }).then(function (response) { // At this point, Flask has printed our JSON
+      return response.text();
+  }).then(function (text) {
+   
+   
+      var ttn=txtarea.innerHTML;
+      ttn+=text;
+      txtarea.innerHTML=ttn;
+  });
+}
+
 function shortcuts(e)
 {
    if(e.ctrlKey && e.keyCode==90)
@@ -126,7 +145,8 @@ function shortcuts(e)
    } 
    if(e.keyCode==32)
    {
-      //convert
+      convert();
+      ClearAll();
    }
 }
 

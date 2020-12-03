@@ -13,6 +13,9 @@ class RegistrationForm(Form):
    cpassword = PasswordField("Confirm Password", validators=[InputRequired(), Length(min=8, max=20),EqualTo('password')])
    submit=SubmitField("Sign Up")
 
+class fileform(Form):
+   submit=SubmitField("Submit")
+
 class LoginForm(Form):
    email = StringField('Email', validators=[InputRequired(), Email()])
    password=PasswordField("Password",validators=[InputRequired(),Length(min=8,max=20)])
