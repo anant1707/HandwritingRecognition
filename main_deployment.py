@@ -10,7 +10,6 @@ Created on Thu Nov 12 20:35:51 2020
 import matplotlib.pyplot as plt
 from builtins import str
 from flask import Flask,render_template,request,redirect,url_for,flash,session,jsonify
-from flask_mysqldb import MySQL
 import pyodbc
 import numpy as np
 from forms import ResetForm,RegistrationForm,LoginForm,EmptyForm,ForgotForm,NewPassForm,ChangePassword,fileform
