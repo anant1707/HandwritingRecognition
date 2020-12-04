@@ -239,7 +239,7 @@ def WBO():
 
         foldername=session['email'].lower().split('@')
         foldername=foldername[0]+foldername[1][:-4]
-        path=os.path.join(os.getcwd(),'static\\media\\wbd',foldername)
+        path=os.path.join(app.root_path,'static\\media\\wbd',foldername)
 
 
         if(not os.path.exists(path)):
@@ -275,7 +275,7 @@ def WBO():
             filename=request.args.get('filename')
             foldername=session['email'].split('@')
             foldername=foldername[0]+foldername[1][:-4]
-            path=os.path.join(os.getcwd(),'static\\media\\wbd',foldername)
+            path=os.path.join(app.root_path,'static\\media\\wbd',foldername)
             
 
             if(action=='delete'):
