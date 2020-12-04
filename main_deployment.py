@@ -236,21 +236,16 @@ def WBO():
     #saving
     if request.method=='POST':
         res=request.get_json(force=True)
-
         foldername=session['email'].lower().split('@')
         foldername=foldername[0]+foldername[1][:-4]
-        path=os.path.join(app.root_path,'static\\media\\wbd',foldername)
-
-
-        if(not os.path.exists(path)):
-            os.mkdir(path)
-
+        path=os.path.join(app.root_path,f'static/media/wbd/{foldername}')
+        
         drawing=dict()
         for i in range(len(res)-1):
             drawing[f"stroke{i}"]=res[i]
         
         filename=res[-1]['filename']
-        print(filename)
+        
         now=datetime.now()
         noww=now.strftime("%Y-%m-%d %H:%M:%S")
         with open(f'{path}/{filename}.json', 'w') as json_file:
@@ -263,7 +258,8 @@ def WBO():
             cursor.execute(f"insert into wbd values('{session['email'].lower()}','{filename}','{noww}')")
         else:
             cursor.execute(f"update wbd set date_modified='{noww}' where owned='{session['email'].lower()}'")
-    cnxn.commit()
+
+        cnxn.commit()
         
 
     if(request.args.get('action')):
@@ -275,12 +271,12 @@ def WBO():
             filename=request.args.get('filename')
             foldername=session['email'].split('@')
             foldername=foldername[0]+foldername[1][:-4]
-            path=os.path.join(app.root_path,'static\\media\\wbd',foldername)
+            path=os.path.join(app.root_path,f'static/media/wbd/{foldername}')
             
 
             if(action=='delete'):
                 
-                print(os.path.join(path,filename))
+                #print(os.path.join(path,filename))
                 if(os.path.exists(os.path.join(path,f"{filename}.json"))):
                     os.remove(os.path.join(path,f"{filename}.json"))
                     cursor.execute(f"delete from wbd where owned='{session['email'].lower()}' and filename='{filename}'")
@@ -295,7 +291,7 @@ def WBO():
          
                         points.append(stroke)
 
-                    print(points)
+                    #print(points)
                     return render_template('whiteboard.html',data=points)
     
     cursor.execute(f"select * from wbd where owned='{session['email'].lower()}' order by date_modified desc")
@@ -343,6 +339,10 @@ def register():
             try:
                 #print(f"INSERT INTO USERINFO VALUES {tuple(regdata)}")
                 cursor.execute(f"INSERT INTO USERINFO VALUES {tuple(regdata)}")
+                session['email']=result['email']
+                foldername=session['email'].lower().split('@')
+                foldername=foldername[0]+foldername[1][:-4]
+                os.mkdir(os.path.join(app.root_path,f'static/media/wbd/{foldername}'))
 
             except:
                 flash('Some Error Occured,Try Again!','danger')
